@@ -475,12 +475,11 @@ write_card(int write_block_zero)
         // The first block 0x00 is read only, skip this
         if (uiBlock == 0 && !write_block_zero && !magic2 && !iscuid)
           continue;
-
+        printf("Process block %d \n%s", uiBlock, mtDump.amb[uiBlock].mbd.abtData);
         // Make sure a earlier write did not fail
         if (!bFailure) {
           // Try to write the data block
           if (bFormatCard && uiBlock)
-
             memset(mp.mpd.abtData, 0x00, sizeof(mp.mpd.abtData));
           else
             memcpy(mp.mpd.abtData, mtDump.amb[uiBlock].mbd.abtData, sizeof(mp.mpd.abtData));
