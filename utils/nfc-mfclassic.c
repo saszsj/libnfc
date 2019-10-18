@@ -72,6 +72,7 @@ static bool bTolerateFailures;
 static bool bFormatCard;
 static bool magic2 = false;
 static bool magic3 = false;
+static bool iscuid = false;
 static bool unlocked = false;
 static bool bForceSizeMismatch;
 static uint8_t uiBlocks;
@@ -472,7 +473,7 @@ write_card(int write_block_zero)
         }
       } else {
         // The first block 0x00 is read only, skip this
-        if (uiBlock == 0 && !write_block_zero && !magic2)
+        if (uiBlock == 0 && !write_block_zero && !magic2 && !iscuid)
           continue;
 
         // Make sure a earlier write did not fail
@@ -594,8 +595,8 @@ static void
 print_usage(const char *pcProgramName)
 {
   printf("Usage: ");
-  printf("%s f|r|R|w|W a|b u|U<01ab23cd> <dump.mfd> [<keys.mfd> [f]]\n", pcProgramName);
-  printf("  f|r|R|w|W     - Perform format (f) or read from (r) or unlocked read from (R) or write to (w) or unlocked write to (W) card\n");
+  printf("%s f|r|R|w|W|c a|b u|U<01ab23cd> <dump.mfd> [<keys.mfd> [f]]\n", pcProgramName);
+  printf("  f|r|R|w|W|c     - Perform format (f) or read from (r) or unlocked read from (R) or write to (w) or unlocked write to (W) card\n");
   printf("                  *** format will reset all keys to FFFFFFFFFFFF and all data to 00 and all ACLs to default\n");
   printf("                  *** unlocked read does not require authentication and will reveal A and B keys\n");
   printf("                  *** note that unlocked write will attempt to overwrite block 0 including UID\n");
@@ -696,8 +697,10 @@ main(int argc, const char *argv[])
     bTolerateFailures = tolower((int)((unsigned char) * (argv[2]))) != (int)((unsigned char) * (argv[2]));
     bUseKeyFile = (argc > 5);
     bForceKeyFile = ((argc > 6) && (strcmp((char *)argv[6], "f") == 0));
-  } else if (strcmp(command, "w") == 0 || strcmp(command, "W") == 0 || strcmp(command, "f") == 0) {
+  } else if (strcmp(command, "w") == 0 || strcmp(command, "W") == 0 || strcmp(command, "f") == 0 || strcmp(command, "c") == 0) {
     atAction = ACTION_WRITE;
+    if (strcmp(command, "c") == 0) 
+      iscuid = true;
     if (strcmp(command, "W") == 0)
       unlock = 1;
     bFormatCard = (strcmp(command, "f") == 0);
